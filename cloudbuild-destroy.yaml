@@ -1,0 +1,27 @@
+
+# [START tf-destroy]
+- id: 'tf apply'
+  name: 'hashicorp/terraform:1.0.0'
+  entrypoint: 'sh'
+  args: 
+  - '-c'
+  - | 
+      if [ "$BRANCH_NAME" == "main" ]; then
+        for dir in envs/*/
+          do 
+            cd ${dir}   
+            env=${dir%*/}
+            env=${env#*/}  
+            echo ""
+            echo "*************** TERRAFOM DESTROY ****************"
+            echo "******* At environment: ${env} ********"
+            echo "*************************************************"
+            terraform destroy -auto-approve || exit 1
+            cd ../../
+          done
+      else
+        echo "***************************** SKIPPING DESTROYING *****************************"
+        echo "Branch '$BRANCH_NAME' does not represent an official environment."
+        echo "*******************************************************************************"
+      fi
+# [END tf-destroy]  

@@ -1,0 +1,45 @@
+steps:
+- id: 'ztf init'
+  name: 'hashicorp/terraform:1.0.0'
+  entrypoint: 'sh'
+  args: 
+  - '-c'
+  - |
+      for dir in envs/*/
+      do 
+        cd ${dir}   
+        env=${dir%*/}
+        env=${env#*/}
+        echo ""
+        echo "*************** TERRAFORM INIT ******************"
+        echo "******* At environment: ${env} ********"
+        echo "*************************************************"
+        terraform init || exit 1
+        cd ../../
+      done
+# [START tf-destroy]
+- id: 'tf destroy'
+  name: 'hashicorp/terraform:1.0.0'
+  entrypoint: 'sh'
+  args: 
+  - '-c'
+  - | 
+      if [ "$BRANCH_NAME" == "main" ]; then
+        for dir in envs/*/
+          do 
+            cd ${dir}   
+            env=${dir%*/}
+            env=${env#*/}  
+            echo ""
+            echo "*************** TERRAFOM DESTROY ****************"
+            echo "******* At environment: ${env} ********"
+            echo "*************************************************"
+            terraform destroy -auto-approve || exit 1
+            cd ../../
+          done
+      else
+        echo "***************************** SKIPPING DESTROYING *****************************"
+        echo "Branch '$BRANCH_NAME' does not represent an official environment."
+        echo "*******************************************************************************"
+      fi
+# [END tf-destroy]  

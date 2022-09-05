@@ -1,3 +1,5 @@
 apache-beam[gcp]
 apache-beam[dataframe]
+google-cloud-storage
+google-cloud-bigquery
 textdistance

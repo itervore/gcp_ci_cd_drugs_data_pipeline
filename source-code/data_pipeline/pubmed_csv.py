@@ -13,12 +13,14 @@
 #   limitations under the License.
 
 import argparse
-import apache_beam as beam
-from apache_beam.io.gcp import bigquery
+import apache_beam as beam 
+from apache_beam.io.gcp import bigquery as beam_bigquery
+from google.cloud import bigquery
 from apache_beam.options.pipeline_options import PipelineOptions
 from apache_beam.options.pipeline_options import SetupOptions
 from pipeline.beam_classes.extract import ExtractDataTransform
 import logging
+
 
 def run():
   parser = argparse.ArgumentParser()
@@ -30,6 +32,10 @@ def run():
   pipeline_options = PipelineOptions(pipeline_args)
   pipeline_options.view_as(SetupOptions).save_main_session = True
 
+  # Construct a BigQuery client object.
+  client = bigquery.Client()
+  table = client.get_table(app_args.results_bq_table.split(':')[1])
+  output_schema = table.schema
 
   with beam.Pipeline(options=pipeline_options) as p:
     # ELT: Extract.
@@ -43,17 +49,17 @@ def run():
     
     sep = ','
 
-    results, parsing_errors = p | "Extract and Parse" >> ExtractDataTransform(app_args.input_bucket, header , sep, header_to_bq_header  )
+    results, parsing_errors = p | "Extract and Parse" >> ExtractDataTransform(app_args.input_bucket, header , sep, header_to_bq_header, output_schema )
 
     results | "Write results to BigQuery" >> beam.io.WriteToBigQuery(
       table=app_args.results_bq_table,
-      create_disposition=bigquery.BigQueryDisposition.CREATE_NEVER,
-      write_disposition=bigquery.BigQueryDisposition.WRITE_TRUNCATE)
+      create_disposition=beam_bigquery.BigQueryDisposition.CREATE_NEVER,
+      write_disposition=beam_bigquery.BigQueryDisposition.WRITE_TRUNCATE)
 
     parsing_errors | "Write errors to BigQuery" >> beam.io.WriteToBigQuery(
       table=app_args.errors_bq_table,
-      create_disposition=bigquery.BigQueryDisposition.CREATE_NEVER,
-      write_disposition=bigquery.BigQueryDisposition.WRITE_TRUNCATE)
+      create_disposition=beam_bigquery.BigQueryDisposition.CREATE_NEVER,
+      write_disposition=beam_bigquery.BigQueryDisposition.WRITE_TRUNCATE)
 
 if __name__ == '__main__':
   logging.getLogger().setLevel(logging.INFO)

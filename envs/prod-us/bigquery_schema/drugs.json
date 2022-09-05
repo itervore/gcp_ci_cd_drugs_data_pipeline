@@ -1,0 +1,22 @@
+[
+    {
+      "mode": "NULLABLE",
+      "name": "atccode",
+      "type": "STRING"
+    },
+    {
+      "mode": "NULLABLE",
+      "name": "drug",
+      "type": "STRING"
+    },
+    {
+      "mode": "NULLABLE",
+      "name": "deleted",
+      "type": "BOOLEAN"
+    },
+    {
+      "mode": "NULLABLE",
+      "name": "last_updated",
+      "type": "DATETIME"
+    }
+  ]

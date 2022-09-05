@@ -1,1 +1,6 @@
-project = "gcp-ci-cd-drugs-data-pipeline"
+project_id = "gcp-ci-cd-drugs-data-pipeline"
+project_name = "gcp_ci_cd_drugs_data_pipeline"
+org_id = ""
+location = "US"
+github_owner = "itervore"
+github_repo = "gcp_ci_cd_drugs_data_pipeline"

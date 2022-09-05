@@ -1,0 +1,8 @@
+# ignore all sh scripts
+*.sh
+
+build_deploy_test.yaml
+deploy_prod.yaml
+
+# ignore tests, they will be executed before building the container
+tests

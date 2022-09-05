@@ -15,6 +15,7 @@
 import setuptools
 
 REQUIRED_PACKAGES = ['apache-beam[gcp]',
+                     'apache-beam[dataframe]',
                      'textdistance'
                      ]
 

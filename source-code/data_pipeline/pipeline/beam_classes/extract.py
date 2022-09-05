@@ -14,7 +14,6 @@
 
 from typing import NamedTuple
 import apache_beam as beam
-from apache_beam.dataframe.io import read_csv
 from apache_beam import PCollection
 
 
@@ -28,7 +27,7 @@ from apache_beam.dataframe.convert import to_dataframe, to_pcollection
 
 
 class ExtractDataTransform(beam.PTransform):
-    def __init__(self, csv_location: str, header, sep, header_to_bq_header=None):
+    def __init__(self, csv_location: str, header, sep, header_to_bq_header=None, output_schema=None):
         """ Read and parse input data.
             Returns a successful PCollection and an error-output one.
         Args:
@@ -40,6 +39,7 @@ class ExtractDataTransform(beam.PTransform):
         self.header = header
         self.sep = sep
         self.header_to_bq_header = header_to_bq_header
+        self.output_schema = output_schema
 
         super().__init__()
 
@@ -56,6 +56,11 @@ class ExtractDataTransform(beam.PTransform):
         records: PCollection[NamedTuple] = records_and_errors[ParseCSVDoFn.CORRECT_OUTPUT_TAG]
         parsing_errors: PCollection[dict] = records_and_errors[ParseCSVDoFn.WRONG_OUTPUT_TAG]
 
-        clean_dicts: PCollection[dict] = records | "Clean Records" >> beam.ParDo(AddMetadataDoFn(self.header_to_bq_header))
+        cleaned_records_and_errors: PCollection[dict] = records | "Clean Records" >> beam.ParDo(AddMetadataDoFn(header_to_bq_header=self.header_to_bq_header, output_schema =self.output_schema)).with_outputs()
         
-        return clean_dicts, parsing_errors
+        cleaned_records: PCollection[NamedTuple] = cleaned_records_and_errors[AddMetadataDoFn.CORRECT_OUTPUT_TAG]
+        cleaning_errors: PCollection[dict] = cleaned_records_and_errors[AddMetadataDoFn.WRONG_OUTPUT_TAG]
+
+        merged_errors = (parsing_errors , cleaning_errors) | beam.Flatten()
+
+        return cleaned_records, merged_errors

@@ -18,5 +18,5 @@ python source-code/data_pipeline/pubmed_json.py --runner=DirectRunner \
   --input-bucket="${INPUT_BUCKET}"  \
   --input-filename="pubmed.json"  \
   --results-bq-table="${BQ_RESULTS}.json_pubmed" \
-  --errors-bq-table="${BQ_ERRORS}.errors_pubmed" \
+  --errors-bq-table="${BQ_ERRORS}.errors_json_pubmed" \
   --temp_location="${TEMP_LOCATION}"

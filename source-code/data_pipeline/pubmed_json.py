@@ -15,12 +15,15 @@
 import argparse
 import json
 import re
+from typing import NamedTuple
 import apache_beam as beam
-from google.cloud import storage
-from apache_beam.io.gcp import bigquery
+from google.cloud import storage, bigquery
+from apache_beam.io.gcp import bigquery as beam_bigquery
 from apache_beam.options.pipeline_options import PipelineOptions
 from apache_beam.options.pipeline_options import SetupOptions
 from pipeline.beam_classes.add_metadata import AddMetadataDoFn
+from apache_beam import PCollection
+
 
 import logging
 
@@ -46,6 +49,13 @@ def run():
 
   json_content = json.loads(oneline_str)
 
+  print(json_content)
+
+  # Construct a BigQuery client object.
+  client = bigquery.Client()
+  table = client.get_table(app_args.results_bq_table.split(':')[1])
+  output_schema = table.schema
+  print(output_schema)
 
   with beam.Pipeline(options=pipeline_options) as p:
 
@@ -56,21 +66,32 @@ def run():
       'date' : 'date',
       'journal' : 'journal_title'
     }
-    def create_output_record(record , mapping):
-      output_record = {}
-      for key, value in record.items():
-        if mapping.get(key):
-          output_record[mapping[key]] = value
-        else:
-          output_record[key] = value
-      return output_record
+    # def create_output_record(record , mapping):
+    #   output_record = {}
+    #   for key, value in record.items():
+    #     if mapping.get(key):
+    #       output_record[mapping[key]] = value
+    #     else:
+    #       output_record[key] = value
+    #   return output_record
 
-    output = json_content | beam.ParDo(AddMetadataDoFn(header_to_bq_header))
+    output = json_content | beam.ParDo(AddMetadataDoFn(header_to_bq_header=header_to_bq_header, output_schema=output_schema)).with_outputs()
 
-    output | "Write results to BigQuery" >> beam.io.WriteToBigQuery(
+    cleaned_records: PCollection[NamedTuple] = output[AddMetadataDoFn.CORRECT_OUTPUT_TAG]
+    cleaning_errors: PCollection[dict] = output[AddMetadataDoFn.WRONG_OUTPUT_TAG]
+
+
+    (output |"output" >> beam.Map(print))
+
+    cleaned_records | "Write results to BigQuery" >> beam.io.WriteToBigQuery(
       table=app_args.results_bq_table,
-      create_disposition=bigquery.BigQueryDisposition.CREATE_NEVER,
-      write_disposition=bigquery.BigQueryDisposition.WRITE_TRUNCATE)
+      create_disposition=beam_bigquery.BigQueryDisposition.CREATE_NEVER,
+      write_disposition=beam_bigquery.BigQueryDisposition.WRITE_TRUNCATE)
+
+    cleaning_errors | "Write errors to BigQuery" >> beam.io.WriteToBigQuery(
+      table=app_args.errors_bq_table,
+      create_disposition=beam_bigquery.BigQueryDisposition.CREATE_NEVER,
+      write_disposition=beam_bigquery.BigQueryDisposition.WRITE_TRUNCATE)
 
 
 if __name__ == '__main__':

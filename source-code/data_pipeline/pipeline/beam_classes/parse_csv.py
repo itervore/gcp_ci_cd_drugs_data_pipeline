@@ -72,6 +72,7 @@ class ParseCSVDoFn(DoFn):
         return tmp_str, in_str, multipart_str_is_completed
 
     raise( Exception(f"Too many double quote for a csv in the field: {field}"))
+    
   def process(self, element: str):
     self.input_records_counter.inc()
     Record = namedtuple('Record', self._header_line.split(self.sep))
@@ -94,7 +95,8 @@ class ParseCSVDoFn(DoFn):
 
                 if(len(field) > 0):
                     cleaned_field = re.sub(r'\\x..',r'', field) # REMOVE ALL \x char
-                    
+                
+                
                 cleaned_field = cleaned_field.strip()
                 cleaned_field = cleaned_field.strip('"')      
                 output_elements.append(cleaned_field)  

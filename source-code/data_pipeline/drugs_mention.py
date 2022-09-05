@@ -14,12 +14,16 @@
 
 import argparse
 import json
-import apache_beam as beam
+from codecs import getencoder
+from datetime import date
+import apache_beam as beam  
 from apache_beam.io.gcp import bigquery
 from apache_beam.options.pipeline_options import PipelineOptions
 from apache_beam.options.pipeline_options import SetupOptions
-from pipeline.beam_classes.write_json import SetEncoder
+from pipeline.beam_classes.date_coder import DateCoder
+from pipeline.beam_classes.write_json import TypeEncoder
 from pipeline.beam_classes.list_combine import ListCombineFn
+
 
 import logging
 
@@ -35,6 +39,8 @@ def run():
 
   pipeline_options = PipelineOptions(pipeline_args)
   pipeline_options.view_as(SetupOptions).save_main_session = True
+
+  beam.coders.registry.register_coder(date, DateCoder)
 
 
   with beam.Pipeline(options=pipeline_options) as p:
@@ -77,6 +83,7 @@ def run():
         # beam.GroupBy('journal_title'))
       )
     )
+      
 
     clinicals_trials_journals_by_drug = ( clinicals_trials_journals_by_drug_step
       | 'ProcessData : Group journals' >> beam.Map(
@@ -149,7 +156,6 @@ def run():
         if not is_created:
           ouput_dict_journal[left_journal[0]] = left_journal[1]
       list_output = list(ouput_dict_journal.items())
-      print(list_output)
       return (record[0] , list_output )
 
 
@@ -235,7 +241,7 @@ def run():
 
 
     unique_graph_drug = graph_drug | 'Combine results' >> beam.CombineGlobally(ListCombineFn())
-    json_graph_drug = (unique_graph_drug | 'JSON format' >> beam.Map(json.dumps, cls=SetEncoder) )
+    json_graph_drug = (unique_graph_drug | 'JSON format' >> beam.Map(json.dumps, cls=TypeEncoder) )
 
     json_graph_drug | 'Write Output' >> beam.io.WriteToText(app_args.results_bucket + "/graph_drug_mention", file_name_suffix=".json", shard_name_template='')
 

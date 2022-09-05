@@ -3,7 +3,7 @@
   {
     "mode": "NULLABLE",
     "name": "date",
-    "type": "STRING"
+    "type": "DATE"
   },
   {
       "mode": "NULLABLE",

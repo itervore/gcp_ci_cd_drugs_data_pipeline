@@ -1,0 +1,94 @@
+[
+  
+
+    {
+        "mode": "NULLABLE",
+        "name": "drug_name",
+        "type": "STRING"
+    },
+    {
+        "mode": "NULLABLE",
+        "name": "drug_atc_code",
+        "type": "STRING"
+    },
+    {
+        "name": "journals",
+        "type": "RECORD",
+        "mode": "REPEATED",
+        "fields": [
+            {
+                "name": "journal_title",
+                "type": "STRING",
+                "mode": "NULLABLE"
+            },
+            {
+                "name": "date_mention",
+                "type": "RECORD",
+                "mode": "REPEATED",
+                "fields": [
+                    {
+                        "name": "date",
+                        "type": "STRING",
+                        "mode": "NULLABLE"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "name": "pubmed_articles",
+        "type": "RECORD",
+        "mode": "REPEATED",
+        "fields": [
+            {
+                "mode": "NULLABLE",
+                "name": "date",
+                "type": "STRING"
+            },
+            {
+                "mode": "NULLABLE",
+                "name": "journal_title",
+                "type": "STRING"
+            },
+            {
+                "mode": "NULLABLE",
+                "name": "article_title",
+                "type": "STRING"
+            },
+            {
+                "mode": "NULLABLE",
+                "name": "id",
+                "type": "STRING"
+            }
+        ]
+    },
+    {
+        "name": "clinical_trials_articles",
+        "type": "RECORD",
+        "mode": "REPEATED",
+        "fields": [
+            {
+                "mode": "NULLABLE",
+                "name": "date",
+                "type": "STRING"
+            },
+            {
+                "mode": "NULLABLE",
+                "name": "journal_title",
+                "type": "STRING"
+            },
+            {
+                "mode": "NULLABLE",
+                "name": "article_title",
+                "type": "STRING"
+            },
+            {
+                "mode": "NULLABLE",
+                "name": "id",
+                "type": "STRING"
+            }
+        ]
+    }
+  
+  
+  ]

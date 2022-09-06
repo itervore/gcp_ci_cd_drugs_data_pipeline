@@ -2,6 +2,11 @@ resource "random_id" "composer_random" {
   byte_length = 8
 }
 
+locals {
+  env_var_flex_template = { for pipeline in  fileset("../../source-code", "*.dockerfile"):
+      format("%s%s","template_gcs_location_", trimsuffix(pipeline, ".dockerfile"))  => format("%s/%s%s%s",google_storage_bucket.composer-dataflow-source-test["composer-dataflow-source-test"].url, "template/", trimsuffix(pipeline, ".dockerfile"),"_spec.json")
+  }
+}
 resource "google_composer_environment" "composer-environment" {
   name    = "composer-${random_id.composer_random.hex}"
   region  = var.default_region
@@ -15,7 +20,7 @@ resource "google_composer_environment" "composer-environment" {
     }
     software_config {
       image_version = "composer-2-airflow-2"
-      env_variables = {
+      env_variables = merge({
         AIRFLOW_VAR_GCP_PROJECT                  = var.project_id
         AIRFLOW_VAR_GCP_REGION                   = var.default_region
         AIRFLOW_VAR_GCP_ZONE                     = var.default_zone
@@ -32,7 +37,16 @@ resource "google_composer_environment" "composer-environment" {
         AIRFLOW_VAR_GCS_INPUT_BUCKET_PROD        = trimprefix(google_storage_bucket.composer-dataflow-source-test["composer-input-prod"].url, "gs://")
         AIRFLOW_VAR_GCS_OUTPUT_BUCKET_PROD       = trimprefix(google_storage_bucket.composer-dataflow-source-test["composer-result-prod"].url, "gs://")
         AIRFLOW_VAR_DATAFLOW_STAGING_BUCKET_PROD = trimprefix(google_storage_bucket.composer-dataflow-source-test["dataflow-staging-prod"].url, "gs://")
-      }    
+        AIRFLOW_VAR_COMPOSER_RESULTS_BQ                     = format("%s:%s", 
+                                                  google_bigquery_dataset.bq_dataset_test.project,
+                                                  google_bigquery_dataset.bq_dataset_test.dataset_id)
+        AIRFLOW_VAR_COMPOSER_ERRORS_BQ                     = format("%s:%s", 
+                                                  google_bigquery_dataset.bq_dataset_test.project,
+                                                  google_bigquery_dataset.bq_dataset_test.dataset_id)
+      },
+      local.env_var_flex_template
+      
+      )    
     }
     environment_size = "ENVIRONMENT_SIZE_SMALL"
 

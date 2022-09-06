@@ -58,19 +58,19 @@ steps:
       '--sdk-language=PYTHON', 
       '--metadata-file=source-code/template_spec/${_PIPELINE_NAME}_metadata.json'
     ]
-  - id: "wait-for-composer-to-be-available"
-    name: gcr.io/cloud-builders/gcloud
-    entrypoint: "bash"
-    dir: "./source-code"
-    args:
-      [
-        "wait_for_composer_available.sh",
-        "${_COMPOSER_ENV_NAME}",
-        "${_COMPOSER_REGION}",
-        "template_gcs_location_${_PIPELINE_NAME}=${_TEMPLATE_GCS_LOCATION},setup_file_${_PIPELINE_NAME}=/dataflow/template/data_pipeline/setup.py",
-        "40",
-        "20",
-      ]
+  # - id: "wait-for-composer-to-be-available"
+  #   name: gcr.io/cloud-builders/gcloud
+  #   entrypoint: "bash"
+  #   dir: "./source-code"
+  #   args:
+  #     [
+  #       "wait_for_composer_available.sh",
+  #       "${_COMPOSER_ENV_NAME}",
+  #       "${_COMPOSER_REGION}",
+  #       "template_gcs_location_${_PIPELINE_NAME}=${_TEMPLATE_GCS_LOCATION},setup_file_${_PIPELINE_NAME}=/dataflow/template/data_pipeline/setup.py",
+  #       "40",
+  #       "20",
+  #     ]
     
 
     ######## TODO ADD INTEGRATION TEST

@@ -19,9 +19,9 @@ from airflow.providers.google.cloud.operators.dataflow import DataflowStartFlexT
 
 dataflow_staging_bucket = f"gs://{models.Variable.get('dataflow_staging_bucket_test')}/staging"
 
-dataflow_jar_location = 'gs://%s/%s' % (
-    models.Variable.get('dataflow_jar_location_test'),
-    models.Variable.get('dataflow_jar_file_test'))
+# dataflow_jar_location = 'gs://%s/%s' % (
+#     models.Variable.get('dataflow_jar_location_test'),
+#     models.Variable.get('dataflow_jar_file_test'))
 
 project = models.Variable.get('gcp_project')
 region = models.Variable.get('gcp_region')
@@ -33,8 +33,14 @@ input_bucket = 'gs://' + models.Variable.get('gcs_input_bucket_test')
 # output_prefix = 'output'
 # download_task_prefix = 'download_result'
 
-output_bq_results = models.Variable.get('_COMPOSER_RESULTS_BQ')
-output_bq_errors = models.Variable.get('_COMPOSER_ERRORS_BQ')
+# QUOTA EXCEEDED
+# output_bq_results = models.Variable.get('composer_results_bq')
+# output_bq_errors = models.Variable.get('composer_errors_bq')
+output_bq_results = "gcp-ci-cd-drugs-data-pipeline:gcp_ci_cd_drugs_data_pipeline"
+output_bq_errors = "gcp-ci-cd-drugs-data-pipeline:gcp_ci_cd_drugs_data_pipeline"
+template_gcs_location_drugs= "gs://gcp-ci-cd-drugs-data-pipeline-composer-dataflow-source-test/template/drugs_spec.json"
+template_gcs_location_drugs_mention= "gs://gcp-ci-cd-drugs-data-pipeline-composer-dataflow-source-test/template/drugs_mention_spec.json"
+template_gcs_location_pubmed= "gs://gcp-ci-cd-drugs-data-pipeline-composer-dataflow-source-test/template/pubmed_spec.json"
 
 yesterday = datetime.datetime.combine(
     datetime.datetime.today() - datetime.timedelta(1),
@@ -65,7 +71,7 @@ def get_flex_template_operator(gcs_template_path, task_name, parameters ):
     return flex_template_operator
 
 with models.DAG(
-    'test_data_pipeline',
+    'test_python_data_pipeline',
     schedule_interval=None,
     default_args=default_args) as dag:
 
@@ -73,10 +79,10 @@ with models.DAG(
     "input-bucket":f"{input_bucket}/drugs.csv",
     "results-bq-table":f"${output_bq_results}.drugs",
     "errors-bq-table": f"${output_bq_errors}.errors_drugs",
-    "setup_file": models.Variable.get('setup_file_drugs')
+    "setup_file": "/dataflow/template/data_pipeline/setup.py"
   }
 
-  dataflow_load_drugs = get_flex_template_operator(models.Variable.get('template_gcs_location_drugs'),'drugs', load_drugs_parameters)
+  dataflow_load_drugs = get_flex_template_operator(template_gcs_location_drugs,'drugs', load_drugs_parameters)
 
   dataflow_load_drugs
 

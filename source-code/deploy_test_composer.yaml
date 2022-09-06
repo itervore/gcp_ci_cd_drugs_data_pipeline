@@ -27,15 +27,15 @@ steps:
 
   ## TODO ADD COMPOSER CI
 
-  - name: gcr.io/cloud-builders/gsutil
-    args: ["cp", "compare_xcom_maps.py", "${_COMPOSER_DAG_BUCKET}"]
-    dir: "./workflow-dag"
-    id: "deploy-custom-operator"
+  # - name: gcr.io/cloud-builders/gsutil
+  #   args: ["cp", "compare_xcom_maps.py", "${_COMPOSER_DAG_BUCKET}"]
+  #   dir: "./workflow-dag"
+  #   id: "deploy-custom-operator"
 
 
   - name: gcr.io/cloud-builders/gsutil
     args: ["cp", "data-pipeline-test.py", "${_COMPOSER_DAG_BUCKET}"]
-    dir: "./workflow-dag"
+    dir: "./source-code/workflow-dag"
     id: "deploy-processing-pipeline"
 
 

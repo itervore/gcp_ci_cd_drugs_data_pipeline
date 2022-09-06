@@ -61,6 +61,7 @@ steps:
   - id: "wait-for-composer-to-be-available"
     name: gcr.io/cloud-builders/gcloud
     entrypoint: "bash"
+    dir: "./source-code"
     args:
       [
         "wait_for_composer_available.sh",

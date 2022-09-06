@@ -3,9 +3,9 @@
     "description": "data pipeline",
     "parameters": [
       {
-        "name": "input-csv",
-        "label": "input-csv",
-        "helpText": "input-csv"
+        "name": "input-bucket",
+        "label": "input-bucket",
+        "helpText": "input-bucket"
       },
       {
         "name": "results-bq-table",

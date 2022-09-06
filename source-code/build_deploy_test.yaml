@@ -31,10 +31,12 @@ steps:
   ################################
 
 
-  - id: 'Unit testing'
-    name: python:3.7-slim-stretch
-    dir: python
-    args: ["./run_unit_tests.sh"]
+  ######### TODO : ADD TESTS
+  
+  # - id: 'Unit testing'
+  #   name: python:3.7-slim-stretch
+  #   dir: python
+  #   args: ["./run_unit_tests.sh"]
 
   - id: "Build the container image"
     name: "gcr.io/cloud-builders/docker"
@@ -56,6 +58,18 @@ steps:
       '--sdk-language=PYTHON', 
       '--metadata-file=source-code/template_spec/metadata.json'
     ]
+
+    ######## TODO ADD INTEGRATION TEST
+
+    # - id: 'System integration test'
+    # name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    # entrypoint: 'bash'
+    # env:
+    #   - 'TEMPLATE_GCS_LOCATION=${_TEMPLATE_GCS_LOCATION}'
+    #   - 'GCP_PROJECT=${PROJECT_ID}'
+    #   - 'REGION=${_REGION}'
+    #   - 'SETUP_FILE=/dataflow/template/data_pipeline/setup.py'
+    # args: ["./run_system_integration_test.sh"]
 
 # 
 
@@ -80,71 +94,78 @@ steps:
   #   dir: "./workflow-dag"
   #   id: "unit-test-on-operator-code"
 
-  - name: gcr.io/cloud-builders/gsutil
-    args: ["cp", "support-files/input.txt", "gs://${_COMPOSER_INPUT_BUCKET}"]
-    dir: "./workflow-dag"
-    id: "deploy-test-input-file"
 
-  - name: gcr.io/cloud-builders/gsutil
-    args: ["cp", "support-files/ref.txt", "gs://${_COMPOSER_REF_BUCKET}"]
-    dir: "./workflow-dag"
-    id: "deploy-test-ref-file"
+  ## TODO ADD COMPOSER CI
 
-  - name: gcr.io/cloud-builders/gcloud
-    args:
-      [
-        "composer",
-        "environments",
-        "run",
-        "${_COMPOSER_ENV_NAME}",
-        "--location",
-        "${_COMPOSER_REGION}",
-        "variables",
-        "--",
-        "--set",
-        "dataflow_jar_file_test",
-        "dataflow_deployment_$BUILD_ID.jar",
-      ]
-    id: "set-composer-jar-ref"
+  # - name: gcr.io/cloud-builders/gsutil
+  #   args: ["cp", "*", "gs://${_COMPOSER_INPUT_BUCKET}"]
+  #   dir: "../data"
+  #   id: "deploy-test-input-file"
 
-  - name: gcr.io/cloud-builders/gsutil
-    args: ["cp", "compare_xcom_maps.py", "${_COMPOSER_DAG_BUCKET}"]
-    dir: "./workflow-dag"
-    id: "deploy-custom-operator"
+  # - name: gcr.io/cloud-builders/gsutil
+  #   args: ["cp", "graph_drug_mention.json", "gs://${_COMPOSER_REF_BUCKET}"]
+  #   dir: "../result_json"
+  #   id: "deploy-test-ref-file"
 
+  # - name: gcr.io/cloud-builders/gcloud
+  #   args:
+  #     [
+  #       "composer",
+  #       "environments",
+  #       "run",
+  #       "${_COMPOSER_ENV_NAME}",
+  #       "--location",
+  #       "${_COMPOSER_REGION}",
+  #       "variables",
+  #       "--",
+  #       "--set",
+  #       "dataflow_jar_file_test",
+  #       "dataflow_deployment_$BUILD_ID.jar",
+  #     ]
+  #   id: "set-composer-jar-ref"
 
-  - name: gcr.io/cloud-builders/gsutil
-    args: ["cp", "data-pipeline-test.py", "${_COMPOSER_DAG_BUCKET}"]
-    dir: "./workflow-dag"
-    id: "deploy-processing-pipeline"
+  # - name: gcr.io/cloud-builders/gsutil
+  #   args: ["cp", "compare_xcom_maps.py", "${_COMPOSER_DAG_BUCKET}"]
+  #   dir: "./workflow-dag"
+  #   id: "deploy-custom-operator"
 
 
-  - name: gcr.io/cloud-builders/gcloud
-    entrypoint: "bash"
-    args:
-      [
-        "wait_for_dag_deployed.sh",
-        "${_COMPOSER_ENV_NAME}",
-        "${_COMPOSER_REGION}",
-        "${_COMPOSER_DAG_NAME_TEST}",
-        "6",
-        "20",
-      ]
-    id: "wait-for-dag-deployed-on-composer"
+  # - name: gcr.io/cloud-builders/gsutil
+  #   args: ["cp", "data-pipeline-test.py", "${_COMPOSER_DAG_BUCKET}"]
+  #   dir: "./workflow-dag"
+  #   id: "deploy-processing-pipeline"
 
 
-  - name: gcr.io/cloud-builders/gcloud
-    args:
-      [
-        "composer",
-        "environments",
-        "run",
-        "${_COMPOSER_ENV_NAME}",
-        "--location",
-        "${_COMPOSER_REGION}",
-        "trigger_dag",
-        "--",
-        "${_COMPOSER_DAG_NAME_TEST}",
-        "--run_id=$BUILD_ID",
-      ]
-    id: "trigger-pipeline-execution"
+  # - name: gcr.io/cloud-builders/gcloud
+  #   entrypoint: "bash"
+  #   args:
+  #     [
+  #       "wait_for_dag_deployed.sh",
+  #       "${_COMPOSER_ENV_NAME}",
+  #       "${_COMPOSER_REGION}",
+  #       "${_COMPOSER_DAG_NAME_TEST}",
+  #       "6",
+  #       "20",
+  #     ]
+  #   id: "wait-for-dag-deployed-on-composer"
+
+
+  # - name: gcr.io/cloud-builders/gcloud
+  #   args:
+  #     [
+  #       "composer",
+  #       "environments",
+  #       "run",
+  #       "${_COMPOSER_ENV_NAME}",
+  #       "--location",
+  #       "${_COMPOSER_REGION}",
+  #       "trigger_dag",
+  #       "--",
+  #       "${_COMPOSER_DAG_NAME_TEST}",
+  #       "--run_id=$BUILD_ID",
+  #     ]
+  #   id: "trigger-pipeline-execution"
+
+
+# To allow time for integration testing
+timeout: 1800s

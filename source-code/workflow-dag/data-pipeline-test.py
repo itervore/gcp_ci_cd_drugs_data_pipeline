@@ -67,6 +67,7 @@ def get_flex_template_operator(gcs_template_path, task_name, parameters ):
         },
         do_xcom_push=True,
         location=region,
+        start_date=yesterday
     )
     return flex_template_operator
 

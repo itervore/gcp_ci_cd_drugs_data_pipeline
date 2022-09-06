@@ -58,39 +58,18 @@ steps:
       '--sdk-language=PYTHON', 
       '--metadata-file=source-code/template_spec/${_PIPELINE_NAME}_metadata.json'
     ]
-
-  - id: "set-composer-variable-gcs-template-path"
-    name: gcr.io/cloud-builders/gcloud
-    args:
-      [
-        "composer",
-        "environments",
-        "run",
-        "${_COMPOSER_ENV_NAME}",
-        "--location",
-        "${_COMPOSER_REGION}",
-        "variables",
-        "--",
-        "--set",
-        "template_gcs_location_${_PIPELINE_NAME}",
-        '${_TEMPLATE_GCS_LOCATION}',
-      ]
     
-  - id: "set-composer-variable-setup-file"
+  - id: "set-composer-variable"
     name: gcr.io/cloud-builders/gcloud
     args:
       [
         "composer",
         "environments",
-        "run",
+        "update",
         "${_COMPOSER_ENV_NAME}",
         "--location",
         "${_COMPOSER_REGION}",
-        "variables",
-        "--",
-        "--set",
-        "setup_file_${_PIPELINE_NAME}",
-        '/dataflow/template/data_pipeline/setup.py',
+        "--update-env-variables=template_gcs_location_${_PIPELINE_NAME}={_TEMPLATE_GCS_LOCATION},setup_file_${_PIPELINE_NAME}=/dataflow/template/data_pipeline/setup.py,',
       ]
 
     ######## TODO ADD INTEGRATION TEST

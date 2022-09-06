@@ -15,9 +15,9 @@
 """
 import datetime
 from airflow import models
+from airflow.providers.google.cloud.operators.dataflow import DataflowStartFlexTemplateOperator
 
-dataflow_staging_bucket = 'gs://%s/staging' % (
-    models.Variable.get('dataflow_staging_bucket_test'))
+dataflow_staging_bucket = f"gs://{models.Variable.get('dataflow_staging_bucket_test')}/staging"
 
 dataflow_jar_location = 'gs://%s/%s' % (
     models.Variable.get('dataflow_jar_location_test'),
@@ -27,11 +27,14 @@ project = models.Variable.get('gcp_project')
 region = models.Variable.get('gcp_region')
 zone = models.Variable.get('gcp_zone')
 input_bucket = 'gs://' + models.Variable.get('gcs_input_bucket_test')
-output_bucket_name = models.Variable.get('gcs_output_bucket_test')
-output_bucket = 'gs://' + output_bucket_name
-ref_bucket = models.Variable.get('gcs_ref_bucket_test')
-output_prefix = 'output'
-download_task_prefix = 'download_result'
+# output_bucket_name = models.Variable.get('gcs_output_bucket_test')
+# output_bucket = 'gs://' + output_bucket_name
+# ref_bucket = models.Variable.get('gcs_ref_bucket_test')
+# output_prefix = 'output'
+# download_task_prefix = 'download_result'
+
+output_bq_results = models.Variable.get('_COMPOSER_RESULTS_BQ')
+output_bq_errors = models.Variable.get('_COMPOSER_ERRORS_BQ')
 
 yesterday = datetime.datetime.combine(
     datetime.datetime.today() - datetime.timedelta(1),
@@ -46,8 +49,79 @@ default_args = {
     }
 }
 
+def get_flex_template_operator(gcs_template_path, task_name, parameters ):
+    flex_template_operator = DataflowStartFlexTemplateOperator(
+        task_id=task_name,
+        body={
+            "launchParameter": {
+                "containerSpecGcsPath": gcs_template_path,
+                # "jobName": DATAFLOW_FLEX_TEMPLATE_JOB_NAME,
+                "parameters": parameters,
+            }
+        },
+        do_xcom_push=True,
+        location=region,
+    )
+    return flex_template_operator
+
 with models.DAG(
     'test_data_pipeline',
     schedule_interval=None,
     default_args=default_args) as dag:
-    print('TODO: Create Dag')
+
+  load_drugs_parameters = {
+    "input-bucket":f"{input_bucket}/drugs.csv",
+    "results-bq-table":f"${output_bq_results}.drugs",
+    "errors-bq-table": f"${output_bq_errors}.errors_drugs",
+    "setup_file": models.Variable.get('setup_file_drugs')
+  }
+
+  dataflow_load_drugs = get_flex_template_operator(models.Variable.get('template_gcs_location_drugs'),'drugs', load_drugs_parameters)
+
+  dataflow_load_drugs
+
+#   download_expected = GoogleCloudStorageDownloadOperator(
+#       task_id='download_ref_string',
+#       bucket=ref_bucket,
+#       object='ref.txt',
+#       store_to_xcom_key='ref_str',
+#       start_date=yesterday
+#   )
+#   download_result_one = GoogleCloudStorageDownloadOperator(
+#       task_id=download_task_prefix+'_1',
+#       bucket=output_bucket_name,
+#       object=output_prefix+'-00000-of-00003',
+#       store_to_xcom_key='res_str_1',
+#       start_date=yesterday
+#   )
+#   download_result_two = GoogleCloudStorageDownloadOperator(
+#       task_id=download_task_prefix+'_2',
+#       bucket=output_bucket_name,
+#       object=output_prefix+'-00001-of-00003',
+#       store_to_xcom_key='res_str_2',
+#       start_date=yesterday
+#   )
+#   download_result_three = GoogleCloudStorageDownloadOperator(
+#       task_id=download_task_prefix+'_3',
+#       bucket=output_bucket_name,
+#       object=output_prefix+'-00002-of-00003',
+#       store_to_xcom_key='res_str_3',
+#       start_date=yesterday
+#   )
+#   compare_result = CompareXComMapsOperator(
+#       task_id='do_comparison',
+#       ref_task_ids=['download_ref_string'],
+#       res_task_ids=[download_task_prefix+'_1',
+#                     download_task_prefix+'_2',
+#                     download_task_prefix+'_3'],
+#       start_date=yesterday
+#   )
+
+#   dataflow_execution >> download_result_one
+#   dataflow_execution >> download_result_two
+#   dataflow_execution >> download_result_three
+
+#   download_expected >> compare_result
+#   download_result_one >> compare_result
+#   download_result_two >> compare_result
+#   download_result_three >> compare_result

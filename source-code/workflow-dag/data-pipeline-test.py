@@ -33,7 +33,7 @@ input_bucket = 'gs://' + models.Variable.get('gcs_input_bucket_test')
 # output_prefix = 'output'
 # download_task_prefix = 'download_result'
 
-# QUOTA EXCEEDED
+# QUOTA EXCEEDED, can't update composer anymore
 # output_bq_results = models.Variable.get('composer_results_bq')
 # output_bq_errors = models.Variable.get('composer_errors_bq')
 output_bq_results = "gcp-ci-cd-drugs-data-pipeline:gcp_ci_cd_drugs_data_pipeline"
@@ -43,6 +43,9 @@ template_gcs_location_clinical_trials= "gs://gcp-ci-cd-drugs-data-pipeline-compo
 
 template_gcs_location_drugs_mention= "gs://gcp-ci-cd-drugs-data-pipeline-composer-dataflow-source-test/template/drugs_mention_spec.json"
 template_gcs_location_pubmed= "gs://gcp-ci-cd-drugs-data-pipeline-composer-dataflow-source-test/template/pubmed_spec.json"
+template_gcs_location_pubmed_json= "gs://gcp-ci-cd-drugs-data-pipeline-composer-dataflow-source-test/template/pubmed_json_spec.json"
+template_gcs_location_pubmed_csv= "gs://gcp-ci-cd-drugs-data-pipeline-composer-dataflow-source-test/template/pubmed_csv_spec.json"
+
 
 yesterday = datetime.datetime.combine(
     datetime.datetime.today() - datetime.timedelta(1),
@@ -96,53 +99,52 @@ with models.DAG(
 
   dataflow_load_clinical_trials = get_flex_template_operator(template_gcs_location_clinical_trials,'clinicals_trials_data_pipeline', load_clinical_trials_parameters)
 
+  load_pubmed_csv_parameters = {
+    "input-bucket":f"{input_bucket}/pubmed.csv",
+    "results-bq-table":f"${output_bq_results}.csv_pubmed",
+    "errors-bq-table": f"${output_bq_errors}.errors_csv_pubmed",
+    "setup_file": "/dataflow/template/data_pipeline/setup.py"
+  }
+
+  dataflow_load_pubmed_csv = get_flex_template_operator(template_gcs_location_pubmed_csv,'pubmed_csv_data_pipeline', load_pubmed_csv_parameters)
+
+  load_pubmed_json_parameters = {
+    "input-bucket":f"{input_bucket}",
+    "input-filename":"pubmed.json",
+    "results-bq-table":f"${output_bq_results}.json_pubmed",
+    "errors-bq-table": f"${output_bq_errors}.errors_json_pubmed",
+    "setup_file": "/dataflow/template/data_pipeline/setup.py"
+  }
+
+  dataflow_load_pubmed_json = get_flex_template_operator(template_gcs_location_pubmed_json,'pubmed_json_data_pipeline', load_pubmed_json_parameters)
+
+  load_pubmed_parameters = {
+    "input-csv-bq-table":f"{output_bq_results}.csv_pubmed",
+    "input-json-bq-table":f"{output_bq_results}.json_pubmed",
+    "results-bq-table":f"${output_bq_results}.pubmed",
+    "setup_file": "/dataflow/template/data_pipeline/setup.py"
+  }
+
+  dataflow_load_pubmed = get_flex_template_operator(template_gcs_location_pubmed,'pubmed_data_pipeline', load_pubmed_parameters)
+
+  load_drugs_mention_parameters = {
+    "bq-drug-table":f"{output_bq_results}.drugs",
+    "bq-clinicals-trials-table":f"{output_bq_results}.clinical_trials",
+    "bq-pubmed-table":f"{output_bq_results}.pubmed",
+    "results-bucket":f"gs://gcp-ci-cd-drugs-data-pipeline-composer-result-test",
+    "results-bq-table":f"${output_bq_results}.drug_mention",
+    "errors-bq-table":f"${output_bq_results}.errors_drug_mention",
+    "setup_file": "/dataflow/template/data_pipeline/setup.py"
+  }
+
+  dataflow_load_drugs_mention = get_flex_template_operator(template_gcs_location_drugs_mention,'drug_mention_data_pipeline', load_drugs_mention_parameters)
+
 
   dataflow_load_drugs
-
   dataflow_load_clinical_trials
+  dataflow_load_pubmed_json >>  dataflow_load_pubmed
+  dataflow_load_pubmed_csv  >>  dataflow_load_pubmed
 
-#   download_expected = GoogleCloudStorageDownloadOperator(
-#       task_id='download_ref_string',
-#       bucket=ref_bucket,
-#       object='ref.txt',
-#       store_to_xcom_key='ref_str',
-#       start_date=yesterday
-#   )
-#   download_result_one = GoogleCloudStorageDownloadOperator(
-#       task_id=download_task_prefix+'_1',
-#       bucket=output_bucket_name,
-#       object=output_prefix+'-00000-of-00003',
-#       store_to_xcom_key='res_str_1',
-#       start_date=yesterday
-#   )
-#   download_result_two = GoogleCloudStorageDownloadOperator(
-#       task_id=download_task_prefix+'_2',
-#       bucket=output_bucket_name,
-#       object=output_prefix+'-00001-of-00003',
-#       store_to_xcom_key='res_str_2',
-#       start_date=yesterday
-#   )
-#   download_result_three = GoogleCloudStorageDownloadOperator(
-#       task_id=download_task_prefix+'_3',
-#       bucket=output_bucket_name,
-#       object=output_prefix+'-00002-of-00003',
-#       store_to_xcom_key='res_str_3',
-#       start_date=yesterday
-#   )
-#   compare_result = CompareXComMapsOperator(
-#       task_id='do_comparison',
-#       ref_task_ids=['download_ref_string'],
-#       res_task_ids=[download_task_prefix+'_1',
-#                     download_task_prefix+'_2',
-#                     download_task_prefix+'_3'],
-#       start_date=yesterday
-#   )
-
-#   dataflow_execution >> download_result_one
-#   dataflow_execution >> download_result_two
-#   dataflow_execution >> download_result_three
-
-#   download_expected >> compare_result
-#   download_result_one >> compare_result
-#   download_result_two >> compare_result
-#   download_result_three >> compare_result
+  dataflow_load_pubmed            >>  dataflow_load_drugs_mention
+  dataflow_load_clinical_trials   >>  dataflow_load_drugs_mention
+  dataflow_load_drugs             >>  dataflow_load_drugs_mention

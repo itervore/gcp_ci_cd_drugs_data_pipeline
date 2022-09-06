@@ -22,15 +22,15 @@ import logging
 
 def run():
   parser = argparse.ArgumentParser()
-  parser.add_argument("--input-bucket", required=True)
-  parser.add_argument("--results-bq-table", required=True)
-  parser.add_argument("--errors-bq-table", required=True)
+  parser.add_argument("--input-bucket", required=True, default="gs://gcp-ci-cd-drugs-data-pipeline-composer-input-test/drugs.csv")
+  parser.add_argument("--results-bq-table", required=True, default="gcp-ci-cd-drugs-data-pipeline:gcp_ci_cd_drugs_data_pipeline.drugs")
+  parser.add_argument("--errors-bq-table", required=True, default="gcp-ci-cd-drugs-data-pipeline:gcp_ci_cd_drugs_data_pipeline.errors_drugs")
   app_args, pipeline_args = parser.parse_known_args()
 
   pipeline_options = PipelineOptions(pipeline_args)
   pipeline_options.view_as(SetupOptions).save_main_session = True
 
-  with beam.Pipeline(options=pipeline_options) as p:
+  with beam.Pipeline(argv=pipeline_options) as p:
 
     header = 'atccode,drug'
     sep = ','

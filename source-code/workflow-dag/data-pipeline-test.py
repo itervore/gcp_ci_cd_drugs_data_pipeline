@@ -61,7 +61,7 @@ def get_flex_template_operator(gcs_template_path, task_name, parameters ):
         body={
             "launchParameter": {
                 "containerSpecGcsPath": gcs_template_path,
-                "jobName": task_name,
+                "jobName": "dataflow-flex-template"+task_name,
                 "parameters": parameters,
             }
         },

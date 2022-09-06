@@ -67,7 +67,7 @@ steps:
         "trigger",
         "--",
         "${_COMPOSER_DAG_NAME_TEST}",
-        "--run_id=$BUILD_ID",
+        "--run-id=$BUILD_ID",
       ]
     id: "trigger-pipeline-execution"
 

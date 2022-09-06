@@ -68,7 +68,7 @@ resource "google_cloudbuild_trigger" "non_master_trigger_build_deploy_flex_templ
     _REGION                 = var.default_region #Python
     _IMAGE_NAME             = format("%s_%s",var.target_gcr_image,trimsuffix(each.key, ".dockerfile"))
     _IMAGE_TAG              = var.target_gcr_image_tag
-    _TEMPLATE_GCS_LOCATION  = format("%s/%s%s%s",google_storage_bucket.composer-dataflow-source-test["composer-dataflow-source-test"].url, "template/",trimsuffix(each.key, ".dockerfile"),"spec.json") # Python
+    _TEMPLATE_GCS_LOCATION  = format("%s/%s%s%s",google_storage_bucket.composer-dataflow-source-test["composer-dataflow-source-test"].url, "template/",trimsuffix(each.key, ".dockerfile"),"_spec.json") # Python
     _PIPELINE_NAME          = trimsuffix(each.key, ".dockerfile")
   }
 

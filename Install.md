@@ -61,4 +61,6 @@ Configurations à effectuer :
 11. Configuration des variables d'environnement pour l'exécution de temple Flex :
     ```bash
     export SETUP_FILE="/dataflow/template/data_pipeline/setup.py"
+    export TEMPLATE_GCS_LOCATION="gs://${PROJECT_ID}-composer-dataflow-source-test/template/spec.json"
+    export TEMPLATE_GCS_LOCATION="gs://${PROJECT_ID}-composer-dataflow-source-test/template/spec.json"
     ```

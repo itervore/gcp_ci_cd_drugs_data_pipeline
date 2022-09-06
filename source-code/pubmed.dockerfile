@@ -1,5 +1,3 @@
-#!/bin/sh
-
 #   Copyright 2021 Google LLC
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,11 +12,14 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-RUN_ID="$(date +%Y%m%d-%H%M%S)"
+FROM gcr.io/dataflow-templates-base/python3-template-launcher-base
 
-gcloud dataflow flex-template run "data-pipeline-${RUN_ID}" \
-  --project="${PROJECT_ID}" \
-  --region="${REGION}" \
-  --template-file-gcs-location="${TEMPLATE_GCS_LOCATION}" \
-  --parameters=input-bucket="${INPUT_BUCKET}/clinical_trials.csv",results-bq-table="${BQ_RESULTS}.clinical_trials",errors-bq-table="${BQ_ERRORS}.errors_clinical_trials",setup_file=${SETUP_FILE} \
-  --temp-location="${TEMP_LOCATION}"
+COPY . /dataflow/template
+
+RUN pip install -U -r /dataflow/template/requirements.txt
+
+WORKDIR /dataflow/template
+
+# Entry point for the Dataflow job.
+# By setting this variable, no need for setting DATAFLOW_PYTHON_COMMAND_SPEC=python_command_spec.json.
+ENV FLEX_TEMPLATE_PYTHON_PY_FILE="/dataflow/template/data_pipeline/pubmed.py"

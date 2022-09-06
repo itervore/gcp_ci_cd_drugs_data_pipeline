@@ -1,0 +1,31 @@
+{
+    "name": "pubmed_json_data_pipeline",
+    "description": "pubmed_json data pipeline",
+    "parameters": [
+      {
+        "name": "input-bucket",
+        "label": "input-bucket",
+        "helpText": "input-bucket"
+      },
+      {
+        "name": "input-filename",
+        "label": "input-filename",
+        "helpText": "input-filename"
+      },
+      {
+        "name": "results-bq-table",
+        "label": "results-bq-table",
+        "helpText": "results-bq-table"
+      },
+      {
+        "name": "errors-bq-table",
+        "label": "errors-bq-table",
+        "helpText": "errors-bq-table"
+      },
+      {
+        "name": "setup_file",
+        "label": "setup_file",
+        "helpText": "Path to Python setup.py in the docker image."
+      }
+    ]
+  }

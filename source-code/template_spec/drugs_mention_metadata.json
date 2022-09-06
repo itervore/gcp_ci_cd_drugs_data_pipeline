@@ -1,0 +1,41 @@
+{
+    "name": "drug_mention_data_pipeline",
+    "description": "drug_mention data pipeline",
+    "parameters": [
+      {
+        "name": "bq-drug-table",
+        "label": "bq-drug-table",
+        "helpText": "bq-drug-table"
+      },
+      {
+        "name": "bq-clinicals-trials-table",
+        "label": "bq-clinicals-trials-table",
+        "helpText": "bq-clinicals-trials-table"
+      },
+      {
+        "name": "bq-pubmed-table",
+        "label": "bq-pubmed-table",
+        "helpText": "bq-pubmed-table"
+      },
+      {
+        "name": "results-bucket",
+        "label": "results-bucket",
+        "helpText": "results-bucket"
+      },
+      {
+        "name": "results-bq-table",
+        "label": "results-bq-table",
+        "helpText": "results-bq-table"
+      },
+      {
+        "name": "errors-bq-table",
+        "label": "errors-bq-table",
+        "helpText": "errors-bq-table"
+      },
+      {
+        "name": "setup_file",
+        "label": "setup_file",
+        "helpText": "Path to Python setup.py in the docker image."
+      }
+    ]
+  }

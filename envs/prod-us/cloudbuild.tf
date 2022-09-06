@@ -35,9 +35,25 @@
 #  Cloud Build - Non Master branch triggers
 #  ***********************************************/
 
+locals {
+  flex_list = toset([
+    "composer-dataflow-source-test",
+    "composer-input-test",
+    "composer-ref-test",
+    "composer-result-test",
+    "dataflow-staging-test",
+    "composer-dataflow-source-prod",
+    "composer-input-prod",
+    "composer-result-prod",
+    "dataflow-staging-prod"
+    ])
+}
+
 resource "google_cloudbuild_trigger" "non_master_trigger_deploy_composer" {
+  for_each = fileset("../../source-code", "*.dockerfile")
+
   project     = var.project_id
-  description = "Composer deploy test"
+  description = format("%s%s","Build Flex template : ", trimsuffix(each.key, ".dockerfile"))
 
   github {
     owner = var.github_owner
@@ -66,6 +82,7 @@ resource "google_cloudbuild_trigger" "non_master_trigger_deploy_composer" {
     _IMAGE_NAME             = var.target_gcr_image
     _IMAGE_TAG              = var.target_gcr_image_tag
     _TEMPLATE_GCS_LOCATION  = format("%s/%s",google_storage_bucket.composer-dataflow-source-test["composer-dataflow-source-test"].url, "template/spec.json") # Python
+    _PIPELINE_NAME          = trimsuffix(each.key, ".dockerfile")
   }
 
   filename = var.cloudbuild_deploy_test_composer_filename

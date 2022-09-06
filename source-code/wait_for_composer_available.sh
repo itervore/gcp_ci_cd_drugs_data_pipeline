@@ -13,8 +13,10 @@ do
     break
   elif [[ "$custom_comm" == *"ERROR: (gcloud.composer.environments.update) FAILED_PRECONDITION: Cannot update environment in state UPDATING. Environment must be in RUNNING state."* ]]; then
     echo "This failure is expected if environment in state UPDATING"
+  elif [[ "$custom_comm" == *"ERROR: (gcloud.composer.environments.update) FAILED_PRECONDITION: Cannot update environment in state PENDING_UPDATE. Environment must be in RUNNING state."* ]]; then
+    echo "This failure is expected if environment in state UPDATING"
   else 
-    status = 1
+    status=1
     break
   fi
   n=$(($n+1))

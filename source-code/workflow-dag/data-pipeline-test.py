@@ -39,7 +39,7 @@ input_bucket = 'gs://' + models.Variable.get('gcs_input_bucket_test')
 output_bq_results = "gcp-ci-cd-drugs-data-pipeline:gcp_ci_cd_drugs_data_pipeline"
 output_bq_errors = "gcp-ci-cd-drugs-data-pipeline:gcp_ci_cd_drugs_data_pipeline"
 template_gcs_location_drugs= "gs://gcp-ci-cd-drugs-data-pipeline-composer-dataflow-source-test/template/drugs_spec.json"
-template_gcs_location_clinical_trials= "gs://gcp-ci-cd-drugs-data-pipeline-composer-dataflow-source-test/template/clinicals_trials_spec.json"
+template_gcs_location_clinical_trials= "gs://gcp-ci-cd-drugs-data-pipeline-composer-dataflow-source-test/template/clinical_trials_spec.json"
 
 template_gcs_location_drugs_mention= "gs://gcp-ci-cd-drugs-data-pipeline-composer-dataflow-source-test/template/drugs_mention_spec.json"
 template_gcs_location_pubmed= "gs://gcp-ci-cd-drugs-data-pipeline-composer-dataflow-source-test/template/pubmed_spec.json"
@@ -63,7 +63,7 @@ def get_flex_template_operator(gcs_template_path, task_name, parameters ):
         body={
             "launchParameter": {
                 "containerSpecGcsPath": gcs_template_path,
-                "jobName": "dataflow-flex-template-"+task_name,
+                "jobName": task_name.replace("_","-"),
                 "parameters": parameters,
             }
         },
@@ -79,22 +79,22 @@ with models.DAG(
     default_args=default_args) as dag:
 
   load_drugs_parameters = {
-    "input_bucket":f"{input_bucket}/drugs.csv",
-    "results_bq_table":f"${output_bq_results}.drugs",
-    "errors_bq_table": f"${output_bq_errors}.errors_drugs",
+    "input-bucket":f"{input_bucket}/drugs.csv",
+    "results-bq-table":f"${output_bq_results}.drugs",
+    "errors-bq-table": f"${output_bq_errors}.errors_drugs",
     "setup_file": "/dataflow/template/data_pipeline/setup.py"
   }
 
-  dataflow_load_drugs = get_flex_template_operator(template_gcs_location_drugs,'drugs', load_drugs_parameters)
+  dataflow_load_drugs = get_flex_template_operator(template_gcs_location_drugs,'drugs_data_pipeline', load_drugs_parameters)
 
   load_clinical_trials_parameters = {
-    "input_bucket":f"{input_bucket}/clinical_trials.csv",
-    "results_bq_table":f"${output_bq_results}.clinical_trials",
-    "errors_bq_table": f"${output_bq_errors}.errors_clinical_trials",
+    "input-bucket":f"{input_bucket}/clinical_trials.csv",
+    "results-bq-table":f"${output_bq_results}.clinical_trials",
+    "errors-bq-table": f"${output_bq_errors}.errors_clinical_trials",
     "setup_file": "/dataflow/template/data_pipeline/setup.py"
   }
 
-  dataflow_load_clinical_trials = get_flex_template_operator(template_gcs_location_clinical_trials,'clinicals-trials', load_clinical_trials_parameters)
+  dataflow_load_clinical_trials = get_flex_template_operator(template_gcs_location_clinical_trials,'clinicals_trials_data_pipeline', load_clinical_trials_parameters)
 
 
   dataflow_load_drugs

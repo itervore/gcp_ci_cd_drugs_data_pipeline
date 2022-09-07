@@ -37,7 +37,7 @@ def run():
   table = client.get_table(app_args.results_bq_table.split(':')[1])
   output_schema = table.schema
 
-  with beam.Pipeline(argv=pipeline_options) as p:
+  with beam.Pipeline(argv=pipeline_args) as p:
     # ELT: Extract.
     header = 'id,title,date,journal'
     header_to_bq_header = {

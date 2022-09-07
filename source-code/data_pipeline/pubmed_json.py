@@ -57,7 +57,7 @@ def run():
   output_schema = table.schema
   print(output_schema)
 
-  with beam.Pipeline(argv=pipeline_options) as p:
+  with beam.Pipeline(argv=pipeline_args) as p:
 
     json_content =  p | beam.Create(json_content)
     header_to_bq_header = {

@@ -37,7 +37,7 @@ def run():
   output_schema = table.schema
 
 
-  with beam.Pipeline(argv=pipeline_options) as p:
+  with beam.Pipeline(argv=pipeline_args) as p:
     header = 'id,scientific_title,date,journal'
     header_to_bq_header = {
         'id' : 'id',

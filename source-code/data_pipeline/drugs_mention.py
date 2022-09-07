@@ -43,7 +43,7 @@ def run():
   beam.coders.registry.register_coder(date, DateCoder)
 
 
-  with beam.Pipeline(argv=pipeline_options) as p:
+  with beam.Pipeline(argv=pipeline_args) as p:
 
     ### READ CLINICALS TRIALS
 

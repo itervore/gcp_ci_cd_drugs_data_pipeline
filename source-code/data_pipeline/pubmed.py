@@ -30,7 +30,7 @@ def run():
   pipeline_options = PipelineOptions(pipeline_args)
   pipeline_options.view_as(SetupOptions).save_main_session = True
 
-  with beam.Pipeline(argv=pipeline_options) as p:
+  with beam.Pipeline(argv=pipeline_args) as p:
 
     csv_input =  p | 'Reading  table : csv_input' >> bigquery.ReadFromBigQuery(
       table=app_args.input_csv_bq_table)

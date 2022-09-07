@@ -21,16 +21,16 @@ import logging
 
 def run():
   parser = argparse.ArgumentParser()
-  parser.add_argument("--input-csv-bq-table", required=True)
-  parser.add_argument("--input-json-bq-table", required=True)
+  parser.add_argument("--input-csv-bq-table", required=True, default="gcp-ci-cd-drugs-data-pipeline:gcp_ci_cd_drugs_data_pipeline.csv_pubmed")
+  parser.add_argument("--input-json-bq-table", required=True, default="gcp-ci-cd-drugs-data-pipeline:gcp_ci_cd_drugs_data_pipeline.json_pubmed")
 
-  parser.add_argument("--results-bq-table", required=True)
+  parser.add_argument("--results-bq-table", required=True, default="gcp-ci-cd-drugs-data-pipeline:gcp_ci_cd_drugs_data_pipeline.pubmed")
   app_args, pipeline_args = parser.parse_known_args()
 
   pipeline_options = PipelineOptions(pipeline_args)
   pipeline_options.view_as(SetupOptions).save_main_session = True
 
-  with beam.Pipeline(options=pipeline_options) as p:
+  with beam.Pipeline(argv=pipeline_args) as p:
 
     csv_input =  p | 'Reading  table : csv_input' >> bigquery.ReadFromBigQuery(
       table=app_args.input_csv_bq_table)

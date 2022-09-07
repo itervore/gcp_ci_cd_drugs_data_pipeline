@@ -22,4 +22,4 @@ WORKDIR /dataflow/template
 
 # Entry point for the Dataflow job.
 # By setting this variable, no need for setting DATAFLOW_PYTHON_COMMAND_SPEC=python_command_spec.json.
-ENV FLEX_TEMPLATE_PYTHON_PY_FILE="/dataflow/template/data_pipeline/main.py"
+ENV FLEX_TEMPLATE_PYTHON_PY_FILE="/dataflow/template/data_pipeline/clinical_trials.py"

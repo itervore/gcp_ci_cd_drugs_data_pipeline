@@ -29,12 +29,12 @@ import logging
 
 def run():
   parser = argparse.ArgumentParser()
-  parser.add_argument("--bq-drug-table", required=True)
-  parser.add_argument("--bq-clinicals-trials-table", required=True)
-  parser.add_argument("--bq-pubmed-table", required=True)
-  parser.add_argument("--results-bucket", required=True)
-  parser.add_argument("--results-bq-table", required=True)
-  parser.add_argument("--errors-bq-table", required=True)
+  parser.add_argument("--bq-drug-table", required=True, default="gcp-ci-cd-drugs-data-pipeline:gcp_ci_cd_drugs_data_pipeline.drugs")
+  parser.add_argument("--bq-clinicals-trials-table", required=True, default="gcp-ci-cd-drugs-data-pipeline:gcp_ci_cd_drugs_data_pipeline.clinical_trials")
+  parser.add_argument("--bq-pubmed-table", required=True, default="gcp-ci-cd-drugs-data-pipeline:gcp_ci_cd_drugs_data_pipeline.pubmed")
+  parser.add_argument("--results-bucket", required=True, default="gs://gcp-ci-cd-drugs-data-pipeline-composer-result-test")
+  parser.add_argument("--results-bq-table", required=True, default="gcp-ci-cd-drugs-data-pipeline:gcp_ci_cd_drugs_data_pipeline.drug_mention")
+  parser.add_argument("--errors-bq-table", required=True, default="gcp-ci-cd-drugs-data-pipeline:gcp_ci_cd_drugs_data_pipeline.errors_drug_mention")
   app_args, pipeline_args = parser.parse_known_args()
 
   pipeline_options = PipelineOptions(pipeline_args)
@@ -43,7 +43,7 @@ def run():
   beam.coders.registry.register_coder(date, DateCoder)
 
 
-  with beam.Pipeline(options=pipeline_options) as p:
+  with beam.Pipeline(argv=pipeline_args) as p:
 
     ### READ CLINICALS TRIALS
 

@@ -29,10 +29,10 @@ import logging
 
 def run():
   parser = argparse.ArgumentParser()
-  parser.add_argument("--input-bucket", required=True)
-  parser.add_argument("--input-filename", required=True)
-  parser.add_argument("--results-bq-table", required=True)
-  parser.add_argument("--errors-bq-table", required=True)
+  parser.add_argument("--input-bucket", required=True, default="gs://gcp-ci-cd-drugs-data-pipeline-composer-input-test")
+  parser.add_argument("--input-filename", required=True, default="pubmed.json")
+  parser.add_argument("--results-bq-table", required=True, default="gcp-ci-cd-drugs-data-pipeline:gcp_ci_cd_drugs_data_pipeline.json_pubmed")
+  parser.add_argument("--errors-bq-table", required=True, default="gcp-ci-cd-drugs-data-pipeline:gcp_ci_cd_drugs_data_pipeline.errors_json_pubmed")
   app_args, pipeline_args = parser.parse_known_args()
 
   pipeline_options = PipelineOptions(pipeline_args)
@@ -57,7 +57,7 @@ def run():
   output_schema = table.schema
   print(output_schema)
 
-  with beam.Pipeline(options=pipeline_options) as p:
+  with beam.Pipeline(argv=pipeline_args) as p:
 
     json_content =  p | beam.Create(json_content)
     header_to_bq_header = {

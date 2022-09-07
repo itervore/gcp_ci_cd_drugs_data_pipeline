@@ -24,9 +24,9 @@ import logging
 
 def run():
   parser = argparse.ArgumentParser()
-  parser.add_argument("--input-bucket", required=True)
-  parser.add_argument("--results-bq-table", required=True)
-  parser.add_argument("--errors-bq-table", required=True)
+  parser.add_argument("--input-bucket", required=True, default="gs://gcp-ci-cd-drugs-data-pipeline-composer-input-test/pubmed.csv")
+  parser.add_argument("--results-bq-table", required=True, default="gcp-ci-cd-drugs-data-pipeline:gcp_ci_cd_drugs_data_pipeline.csv_pubmed")
+  parser.add_argument("--errors-bq-table", required=True, default="gcp-ci-cd-drugs-data-pipeline:gcp_ci_cd_drugs_data_pipeline.clinical_errors_csv_pubmedtrials")
   app_args, pipeline_args = parser.parse_known_args()
 
   pipeline_options = PipelineOptions(pipeline_args)
@@ -37,7 +37,7 @@ def run():
   table = client.get_table(app_args.results_bq_table.split(':')[1])
   output_schema = table.schema
 
-  with beam.Pipeline(options=pipeline_options) as p:
+  with beam.Pipeline(argv=pipeline_args) as p:
     # ELT: Extract.
     header = 'id,title,date,journal'
     header_to_bq_header = {

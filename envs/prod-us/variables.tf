@@ -42,10 +42,15 @@ variable "cloudbuild_deploy_prod_composer_filename" {
   default     = "source-code/deploy_prod.yaml"
 }
 
+variable "cloudbuild_build_deploy_flex_template_filename" {
+  description = "Path and name of Cloud Build YAML definition used to deploy test composer."
+  type        = string
+  default     = "source-code/build_deploy_flex_template.yaml"
+}
 variable "cloudbuild_deploy_test_composer_filename" {
   description = "Path and name of Cloud Build YAML definition used to deploy test composer."
   type        = string
-  default     = "source-code/build_deploy_test.yaml"
+  default     = "source-code/deploy_test_composer.yaml"
 }
 
 variable "target_gcr_image" {

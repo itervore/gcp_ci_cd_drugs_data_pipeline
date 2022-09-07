@@ -1,11 +1,11 @@
 {
-    "name": "data_pipeline",
-    "description": "data pipeline",
+    "name": "pubmed_csv_data_pipeline",
+    "description": "pubmed_csv data pipeline",
     "parameters": [
       {
-        "name": "input-csv",
-        "label": "input-csv",
-        "helpText": "input-csv"
+        "name": "input-bucket",
+        "label": "input-bucket",
+        "helpText": "input-bucket"
       },
       {
         "name": "results-bq-table",
